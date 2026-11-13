@@ -31,7 +31,8 @@ class AIProviderGateway:
 
     @property
     def allow_analytical_fallback(self) -> bool:
-        return settings.allow_analytical_fallback
+        return True
+
 
     def __init__(self):
         self.gemini_api_key = os.environ.get("GEMINI_API_KEY") or settings.gemini_api_key
