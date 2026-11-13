@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+storage/
+knowledge/
+*.djvu.txt
+*.json
+*.log
+*.sqlite
+mahadev_jyotish.db
