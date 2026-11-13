@@ -10,11 +10,12 @@ class Settings(BaseSettings):
     
     # Provider keys (kept strictly server-side, never exposed to client)
     gemini_api_key: str | None = None
-    gemini_model: str = "gemini-3.6-flash"
+    gemini_model: str = "gemini-1.5-flash"
     nvidia_api_key: str | None = None
     nvidia_model: str | None = None
     swiss_ephemeris_path: str | None = None
-    allow_analytical_fallback: bool = False
+    allow_analytical_fallback: bool = True
+
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

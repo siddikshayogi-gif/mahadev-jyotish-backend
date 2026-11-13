@@ -11,3 +11,6 @@ services:
         value: production
       - key: ALLOW_ANALYTICAL_FALLBACK
         value: "true"
+      - key: GEMINI_MODEL
+        value: gemini-1.5-flash
+
