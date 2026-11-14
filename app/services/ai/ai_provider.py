@@ -449,16 +449,21 @@ class AIProviderGateway:
 
         dasha_chain = " -> ".join([d["lord"] for d in evidence.active_dasha_chain[:3]]) if evidence.active_dasha_chain else "सक्रिय ग्रह दशा"
 
-        # Determine exact timing window from candidate_windows or active_dasha_chain
-        start_date_window = "वर्तमान"
-        end_date_window = "2027"
-        if evidence.candidate_windows:
-            best_win = evidence.candidate_windows[0]
+        # Determine exact timing window from future candidate_windows or active_dasha_chain
+        from datetime import datetime, timezone
+        now_date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        future_windows = [w for w in (evidence.candidate_windows or []) if w.end_date >= now_date_str]
+
+        start_date_window = "2027-02"
+        end_date_window = "2028-03"
+        if future_windows:
+            best_win = future_windows[0]
             start_date_window = best_win.start_date[:7]
             end_date_window = best_win.end_date[:7]
         elif len(evidence.active_dasha_chain) > 1:
             start_date_window = evidence.active_dasha_chain[1]["start"][:7]
             end_date_window = evidence.active_dasha_chain[1]["end"][:7]
+
 
         if language == "hi":
             if topic_raw in ["FIRST_MARRIAGE", "MARRIAGE", "LOVE_RELATIONSHIP"]:
