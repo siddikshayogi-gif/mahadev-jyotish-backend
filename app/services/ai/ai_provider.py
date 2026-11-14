@@ -301,7 +301,9 @@ class AIProviderGateway:
                 if windows:
                     events_list = []
                     for idx, w in enumerate(windows[:5], 1):
-                        events_list.append(f"{idx}. कालखंड {w.start_date[:7]} से {w.end_date[:7]}: {w.dasha_lord} ग्रह दशा के प्रभाव से {w.summary}। (बल: {w.evidence_strength})")
+                        clean_summary = w.summary.replace("for EventType.GENERAL_MAJOR_EVENT", "मुख्य जीवन घटना").replace("Significant", "शुभ").replace("influence active in this period", "का प्रभाव सक्रिय रहा")
+                        events_list.append(f"{idx}. कालखंड {w.start_date[:7]} से {w.end_date[:7]}: {w.dasha_lord} ग्रह दशा प्रभाव से {clean_summary}।")
+
 
                 short_exp = "\n\n".join(events_list)
                 timing_str = "यह आपके अतीत (Past Lifecycle) के मुख्य ग्रहों की चाल पर आधारित ऐतिहासिक विश्लेषण है।"
