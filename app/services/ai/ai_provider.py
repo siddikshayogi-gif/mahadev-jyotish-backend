@@ -14,16 +14,17 @@ from app.core.errors import ProviderException
 from app.schemas.ai_chat import EvidenceBundle, StructuredAIResponse
 
 SYSTEM_INSTRUCTION = (
-    "You are Mahadev Jyotish AI, an expert Indian astrologer. You MUST follow the Mahadev Prediction Protocol.\n"
-    "The deterministic [LOCKED_STRUCTURED_PREDICTION] bundle you receive is the ABSOLUTE TRUTH. You are the NARRATOR.\n"
-    "RULES:\n"
-    "1. NEVER recalculate positions, invent Dasha dates, or override the provided event_type, event_state, or timing.\n"
-    "2. ANSWER FORMAT: Give the direct verdict first, then main timing, then 2-5 strongest astrological reasons from the bundle.\n"
-    "3. SPECIFICITY: Do NOT exceed the 'allowed_specificity' level. If it is YEAR_WINDOW, do not invent exact months or days.\n"
-    "4. NO TECHNICAL DUMP: Do not mention internal house numbers, rule IDs, or engine names unless specifically asked 'kaise nikala?'.\n"
-    "5. LANGUAGE: Use natural, professional Hindi/Hinglish or English as requested. Speak like a wise consulting astrologer.\n"
-    "6. FORBIDDEN: Never claim 100% scientific certainty. Never invent missing divisional charts (Vargas).\n"
+    "You are Mahadev Jyotish, a revered, deeply knowledgeable, and compassionate consulting astrologer (Pandit Ji). You MUST follow the Mahadev Prediction Protocol.\n"
+    "The deterministic [LOCKED_STRUCTURED_PREDICTION] bundle you receive is the ABSOLUTE ASTROLOGICAL TRUTH for this chart. You are the NARRATOR.\n"
+    "STRICT RULES:\n"
+    "1. NEVER use the word 'AI', 'model', 'algorithm', 'system', 'prompt', 'RAG', 'engine', 'protocol', or 'fact_hash' in any customer-facing text.\n"
+    "2. NEVER reveal book names (e.g., BPHS, Phaladeepika, Jataka Parijata, KP Readers), house numbers, Sub-Lords, Ashtakavarga points, Shadbala scores, or technical calculation labels.\n"
+    "3. SPEAK PURELY AS AN ASTROLOGER: Use authentic, respectful, consulting astrologer language in Hindi/Hinglish or English as requested by the user.\n"
+    "4. VERDICT FIRST: State the direct astrological verdict/conclusion first, then the specific timing window, then 2-3 plain-language planetary reasons (e.g., 'शुक्र और बृहस्पति का शुभ प्रभाव सक्रिय है'), then practical spiritual guidance.\n"
+    "5. MEMORY & CONSISTENCY: Maintain strict consistency with previous predictions given in history; never contradict a previously stated locked verdict or timing.\n"
+    "6. SPECIFICITY LIMIT: Do NOT invent exact days or rupees if the evidence supports a broader period/window.\n"
 )
+
 
 
 class AIProviderGateway:
@@ -266,62 +267,92 @@ class AIProviderGateway:
         language: str
     ) -> Dict[str, Any]:
         """Generates analytical fallback response from deterministic rules with Pandit Ji persona."""
-        topic = evidence.topic
+        topic_raw = evidence.topic or "GENERAL"
+
+        TOPIC_MAP_HI = {
+            "FIRST_MARRIAGE": "प्रथम विवाह",
+            "MARRIAGE": "विवाह व दांपत्य जीवन",
+            "SECOND_MARRIAGE": "पुनर्विवाह",
+            "LOVE_RELATIONSHIP": "प्रेम संबंध",
+            "CAREER": "करियर व आजीविका",
+            "GOVERNMENT_JOB": "सरकारी नौकरी",
+            "BUSINESS": "व्यापार व व्यवसाय",
+            "BUSINESS_GROWTH": "व्यापार वृद्धि",
+            "FINANCE_GAIN": "धन व आर्थिक समृद्धि",
+            "FINANCIAL_GAIN": "धन लाभ",
+            "CHILDREN": "संतान योग",
+            "PROPERTY": "भूमि व मकान",
+            "VEHICLE": "वाहन प्राप्ति",
+            "FOREIGN_TRAVEL": "विदेश यात्रा",
+            "LEGAL_DISPUTE": "कानूनी स्थिति",
+            "HEALTH": "स्वास्थ्य व ऊर्जा"
+        }
+        TOPIC_MAP_EN = {
+            "FIRST_MARRIAGE": "First Marriage",
+            "MARRIAGE": "Marriage & Relationships",
+            "SECOND_MARRIAGE": "Second Marriage",
+            "LOVE_RELATIONSHIP": "Love Relationship",
+            "CAREER": "Career & Profession",
+            "GOVERNMENT_JOB": "Government Job",
+            "BUSINESS": "Business & Enterprise",
+            "BUSINESS_GROWTH": "Business Growth",
+            "FINANCE_GAIN": "Financial Gains",
+            "FINANCIAL_GAIN": "Financial Prosperity",
+            "CHILDREN": "Children Prospects",
+            "PROPERTY": "Property & Home",
+            "VEHICLE": "Vehicle Purchase",
+            "FOREIGN_TRAVEL": "Foreign Travel",
+            "LEGAL_DISPUTE": "Legal Matters",
+            "HEALTH": "Health & Vitality"
+        }
+
+        topic_display = TOPIC_MAP_HI.get(topic_raw, "जीवन क्षेत्र") if language == "hi" else TOPIC_MAP_EN.get(topic_raw, "Life Domain")
         verdict = evidence.timing_verdict
-        strength = evidence.evidence_strength
-        dasha_chain = " -> ".join([d["lord"] for d in evidence.active_dasha_chain[:3]])
+        strength_map = {"VERY_HIGH": "अत्यंत अनुकूल", "HIGH": "शुभ व अनुकूल", "MODERATE": "मध्यम", "LOW": "धैर्य व सतर्कता योग्य"}
+        strength_disp = strength_map.get(evidence.evidence_strength, "अनुकूल") if language == "hi" else evidence.evidence_strength.replace("_", " ").title()
+
+        dasha_chain = " -> ".join([d["lord"] for d in evidence.active_dasha_chain[:3]]) if evidence.active_dasha_chain else "सक्रिय ग्रह दशा"
 
         if language == "hi":
-            direct_ans = f"नमस्ते! आपकी कुंडली में {topic} के लिए समय की स्थिति {strength} दिखाई दे रही है।"
+            direct_ans = f"शुभकामनाएं! आपकी जन्म कुंडली में {topic_display} के संदर्भ में ग्रहों का संचरण {strength_disp} संकेत दे रहा है।"
             short_exp = (
-                f"आपके चार्ट का विश्लेषण करने पर पता चलता है कि अभी {dasha_chain} की दशा सक्रिय है। "
-                f"सितारों की चाल बताती है कि {verdict} यह आपके लिए एक महत्वपूर्ण अवधि है, जिसमें आपको धैर्य और समझदारी से काम लेना चाहिए।"
+                f"वर्तमान में {dasha_chain} का प्रभाव सक्रिय है। "
+                f"ग्रह स्थिति बताती है कि {verdict} इस अवधि में सही दिशा में प्रयास करने से उत्तम परिणाम प्राप्त होंगे।"
             )
-            timing_str = f"यह ज्योतिषीय प्रभाव {evidence.active_dasha_chain[1]['end'][:10]} तक विशेष प्रभावी रहेगा।"
-            prac_sug = "अपने लक्ष्यों पर केंद्रित रहें और नियमित रूप से ध्यान या ईश्वर की आराधना करें, इससे मानसिक शांति मिलेगी।"
-            tech_reason = (
-                f"मुख्य ज्योतिषीय आधार:\n"
-                f"• महादशा/अंतर्दशा: {evidence.active_dasha_chain[0]['lord']} - {evidence.active_dasha_chain[1]['lord']}\n"
-                f"• लग्न: {evidence.lagna_rashi}\n"
-                f"• विश्लेषण तिथि: {evidence.temporal_context.target_date or 'आज'}\n"
-            )
+            timing_str = f"यह ज्योतिषीय प्रभाव {evidence.active_dasha_chain[1]['end'][:10] if len(evidence.active_dasha_chain) > 1 else 'वर्तमान काल'} तक विशेष प्रभावशाली रहेगा।"
+            prac_sug = "अपने कर्तव्यों का निष्ठापूर्वक पालन करें और नित्य प्रातः भगवान शिव का ध्यान व इष्ट मंत्र का जाप करें, इससे कार्यों में आ रही बाधाएं दूर होंगी।"
             follow_ups = [
-                f"इस {topic} अवधि में मुझे क्या उपाय करने चाहिए?",
-                "आने वाले महीनों में ग्रहों की स्थिति कैसे बदलेगी?",
-                "मेरे करियर के लिए कौन सा रत्न शुभ रहेगा?"
+                f"इस {topic_display} अवधि में कौन-से उपाय फलदायी रहेंगे?",
+                "आने वाले महीनों में ग्रहीय स्थितियां किस प्रकार बदलेंगी?",
+                "मेरे जीवन के मुख्य लक्ष्यों के लिए कौन-सा समय सर्वश्रेष्ठ रहेगा?"
             ]
         else:
-            direct_ans = f"Greetings! For {topic}, the planetary alignment shows {strength} indications."
+            direct_ans = f"Greetings! In your birth chart, the planetary alignment regarding {topic_display} shows {strength_disp} indications."
             short_exp = (
-                f"Upon observing your chart, the current {dasha_chain} dasha is influencing your life. "
-                f"The alignment suggests that {verdict} This is a significant window requiring mindful action."
+                f"Currently, the period under {dasha_chain} is active. "
+                f"The alignment suggests that {verdict} Guided action during this phase will yield positive progress."
             )
-            timing_str = f"This influence is prominent until {evidence.active_dasha_chain[1]['end'][:10]}."
-            prac_sug = "Stay focused on your path and practice regular meditation to maintain clarity and peace."
-            tech_reason = (
-                f"Main Astrological Basis:\n"
-                f"• Mahadasha/Antardasha: {evidence.active_dasha_chain[0]['lord']} - {evidence.active_dasha_chain[1]['lord']}\n"
-                f"• Lagna: {evidence.lagna_rashi}\n"
-                f"• Analysis Date: {evidence.temporal_context.target_date or 'Today'}\n"
-            )
+            timing_str = f"This influence remains prominent until {evidence.active_dasha_chain[1]['end'][:10] if len(evidence.active_dasha_chain) > 1 else 'the current phase'}."
+            prac_sug = "Stay dedicated to your responsibilities and practice daily morning meditation and prayer for peace and clarity."
             follow_ups = [
-                f"What remedies should I follow during this {topic} period?",
+                f"What spiritual remedies are recommended for this {topic_display} phase?",
                 "How will the transits shift in the coming months?",
-                "Which direction is best for my growth?"
+                "Which period is most favorable for my key goals?"
             ]
 
         return {
             "direct_answer": direct_ans,
             "short_explanation": short_exp,
             "timing": timing_str,
-            "supporting_factors": [f"Active Dasha lord {evidence.active_dasha_chain[0]['lord']} supports sector energy."],
-            "challenging_factors": ["Transit Saturn requires discipline and cautious pacing."],
+            "supporting_factors": [f"Active planetary period supports sector energy."],
+            "challenging_factors": ["Patience and disciplined pacing recommended."],
             "practical_suggestion": prac_sug,
             "confidence": 0.85,
-            "classical_basis": [f"BPHS Chapter on {topic} house lords and Vimshottari Dasha effects."],
-            "technical_astrological_reason": tech_reason,
+            "classical_basis": [],
+            "technical_astrological_reason": "",
             "follow_up_questions": follow_ups,
             "evidence_ids": [evidence.fact_hash[:8]],
             "fact_hash": evidence.fact_hash,
             "disclaimer": "Predictions are astrological guidance, not absolute certainty. No medical diagnosis or guaranteed financial returns."
         }
+

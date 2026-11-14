@@ -64,7 +64,7 @@ class ClaimValidator:
 
         allow_direct_strength = bool((evidence.query_flags or {}).get("direct_strength_query"))
 
-        # Scrub accidental internal markers from customer-facing prose.
+        # Scrub accidental internal markers and technical/AI terms from customer-facing prose.
         patterns_to_scrub = [
             r'(?i)मुख्य ज्योतिषीय आधार[^\n]*',
             r'(?i)Main Astrological Basis[^\n]*',
@@ -73,7 +73,20 @@ class ClaimValidator:
             r'(?i)FactHash[^\n]*',
             r'(?i)Evidence Strength[^\n]*',
             r'(?i)Power:\s*(?:VERY_HIGH|HIGH|MODERATE|LOW)[^\n]*',
-            r'\[(?:CALCULATED_FACT|CHART_DATA|KP_SYSTEM_SIGNIFICATORS|VIMSHOTTARI_DASHA_CHAIN|TIMING_SCAN_RESULTS|GOCHAR_TRANSITS|VERIFIED_YOGAS|METHODOLOGY_RULES_RAG|ANALYTICAL_ENGINE_VERDICT|PRIVATE_PREDICTION_DECISION|PRIVATE_FINE_TIMING|USER_OUTPUT_POLICY)\][^\n]*'
+            r'\[(?:CALCULATED_FACT|CHART_DATA|KP_SYSTEM_SIGNIFICATORS|VIMSHOTTARI_DASHA_CHAIN|TIMING_SCAN_RESULTS|GOCHAR_TRANSITS|VERIFIED_YOGAS|METHODOLOGY_RULES_RAG|ANALYTICAL_ENGINE_VERDICT|PRIVATE_PREDICTION_DECISION|PRIVATE_FINE_TIMING|USER_OUTPUT_POLICY)\][^\n]*',
+            r'(?i)\bAI\b',
+            r'(?i)\bArtificial Intelligence\b',
+            r'(?i)\bModel\b',
+            r'(?i)\bAlgorithm\b',
+            r'(?i)\bRAG\b',
+            r'(?i)\bBPHS\b',
+            r'(?i)\bBrihat Parashara\b',
+            r'(?i)\bPhaladeepika\b',
+            r'(?i)\bJataka Parijata\b',
+            r'(?i)\bKP Reader\b',
+            r'(?i)\bSub-Lord\b',
+            r'(?i)\bPlacidus\b',
+            r'(?i)\bSwiss Ephemeris\b'
         ]
         for pattern in patterns_to_scrub:
             if allow_direct_strength and ("Ashtakavarga" in pattern or "Shadbala" in pattern):
@@ -82,3 +95,4 @@ class ClaimValidator:
             repaired.short_explanation = re.sub(pattern, "", repaired.short_explanation or "").strip()
 
         return repaired, status
+
