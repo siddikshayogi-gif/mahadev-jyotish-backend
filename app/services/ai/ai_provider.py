@@ -267,7 +267,136 @@ class AIProviderGateway:
         language: str
     ) -> Dict[str, Any]:
         """Generates analytical fallback response from deterministic rules with Pandit Ji persona."""
+        q_lower = question.lower()
         topic_raw = evidence.topic or "GENERAL"
+
+        # Check if question is asking about Past 5 Events
+        is_past_events_query = (
+            "PAST_5_MAJOR_EVENTS" in topic_raw or
+            any(k in q_lower for k in ["past", "beeti", "pehle ki", "घटनाएं", "घटना", "5 events", "ghatnae", "history"])
+        )
+
+        # Check if question is asking about Today's Daily Forecast
+        is_today_query = (
+            "TODAYS_DAILY_FORECAST" in topic_raw or
+            any(k in q_lower for k in ["aaj ka din", "aaj kaisa", "aaj ka rashifal", "today", "आज का दिन", "आज कैसा"])
+        )
+
+        if is_past_events_query:
+            windows = evidence.candidate_windows or []
+            lagna = evidence.lagna_rashi
+            moon = evidence.moon_rashi
+
+            if language == "hi":
+                direct_ans = f"शुभकामनाएं! आपकी जन्म लग्न कुंडली ({lagna} लग्न, {moon} राशि) के ग्रह चक्र एवं दशा नियमों के अनुसार आपके अतीत जीवन की 5 मुख्य घटनाएं इस प्रकार दृष्टिगोचर होती हैं:"
+
+                events_list = [
+                    "1. प्रारंभिक शिक्षा व ज्ञान विकास काल: बचपन में बुद्ध व गुरु के प्रभाव से शिक्षा व बौद्धिक क्षमता का निर्माण हुआ।",
+                    "2. मुख्य करियर व दिशा निर्धारण काल: 18 से 22 वर्ष की आयु के दौरान प्रथम बड़े करियर परिवर्तन व लक्ष्य निर्धारण का चरण।",
+                    "3. आर्थिक व सामाजिक प्रतिष्ठा वृद्धि: पिछले महत्वपूर्ण दशा परिवर्तन के दौरान कार्यक्षेत्र में उन्नति व नवीन संपर्कों का लाभ।",
+                    "4. पारिवारिक व व्यक्तिगत संबंध मील का पत्थर: शुक्र एवं चंद्र के प्रभाव से व्यक्तिगत जीवन व पारिवारिक संबंधों में महत्वपूर्ण मोड़।",
+                    "5. मानसिक परिपक्वता व आत्म-मंथन काल: शनि व राहु के गोचर प्रभाव से जीवन में अनुशासन, धैर्य व नई दृष्टि का निर्माण।"
+                ]
+
+                if windows:
+                    events_list = []
+                    for idx, w in enumerate(windows[:5], 1):
+                        events_list.append(f"{idx}. कालखंड {w.start_date[:7]} से {w.end_date[:7]}: {w.dasha_lord} ग्रह दशा के प्रभाव से {w.summary}। (बल: {w.evidence_strength})")
+
+                short_exp = "\n\n".join(events_list)
+                timing_str = "यह आपके अतीत (Past Lifecycle) के मुख्य ग्रहों की चाल पर आधारित ऐतिहासिक विश्लेषण है।"
+                prac_sug = "अतीत के अनुभवों से सीख लेकर वर्तमान में अपने इष्ट देव का ध्यान करें, इससे आने वाला समय और भी फलदायी होगा।"
+                follow_ups = [
+                    "भविष्य में आने वाला अगला बड़ा मोड़ कब होगा?",
+                    "मेरी कुंडली के अनुसार मुझे किस क्षेत्र में सर्वाधिक सफलता मिलेगी?",
+                    "आने वाले समय के लिए मुझे कौन-सा महामृत्युंजय या शिव मंत्र जपना चाहिए?"
+                ]
+            else:
+                direct_ans = f"Greetings! Based on your natal chart ({lagna} Ascendant, {moon} Moon) and classical Dasha timelines, here are the 5 major past life milestones indicated by the planets:"
+                events_list = [
+                    "1. Early Foundation & Education: Primary intellectual development shaped by Mercury and Jupiter alignments.",
+                    "2. Career & Direction Milestone: Primary orientation and key career decisions around age 18-22.",
+                    "3. Financial & Professional Growth: Notable rise in professional standings during the preceding key Dasha transition.",
+                    "4. Relationship & Family Milestone: Significant personal or family alignment influenced by Venus/Moon periods.",
+                    "5. Maturity & Realignment Phase: Discipline and valuable life lessons shaped by Saturn and Rahu transits."
+                ]
+                if windows:
+                    events_list = []
+                    for idx, w in enumerate(windows[:5], 1):
+                        events_list.append(f"{idx}. Period {w.start_date[:7]} to {w.end_date[:7]}: Influenced by {w.dasha_lord} Dasha bringing {w.summary}.")
+
+                short_exp = "\n\n".join(events_list)
+                timing_str = "This analysis covers key past transit and Dasha cycles."
+                prac_sug = "Reflect on past learnings and maintain daily spiritual devotion for continued prosperity."
+                follow_ups = [
+                    "When is my next major positive career shift?",
+                    "Which line of work is most favorable for me?",
+                    "What spiritual practice should I follow currently?"
+                ]
+
+            return {
+                "direct_answer": direct_ans,
+                "short_explanation": short_exp,
+                "timing": timing_str,
+                "supporting_factors": ["Dasha timeline alignment", "Planetary strength factors"],
+                "challenging_factors": ["Past Saturn transits required discipline"],
+                "practical_suggestion": prac_sug,
+                "confidence": 0.88,
+                "classical_basis": [],
+                "technical_astrological_reason": "",
+                "follow_up_questions": follow_ups,
+                "evidence_ids": [evidence.fact_hash[:8]],
+                "fact_hash": evidence.fact_hash,
+                "disclaimer": "Predictions are astrological guidance, not absolute certainty. No medical diagnosis or guaranteed financial returns."
+            }
+
+        elif is_today_query:
+            lagna = evidence.lagna_rashi
+            moon = evidence.moon_rashi
+            dasha = " -> ".join([d["lord"] for d in evidence.active_dasha_chain[:2]]) if evidence.active_dasha_chain else "सक्रिय दशा"
+
+            if language == "hi":
+                direct_ans = f"शुभकामनाएं! आपकी जन्म राशि ({moon}) एवं लग्न ({lagna}) के अनुसार आज का दिन आपके लिए मध्यम से शुभ फलदायी रहने के संकेत दे रहा है।"
+                short_exp = (
+                    f"वर्तमान में {dasha} का प्रभाव सक्रिय है। आज चंद्रमा का संचरण आपके लिए अनुकूल स्थिति का निर्माण कर रहा है। "
+                    f"आज के दिन कार्यक्षेत्र में वाणी में मधुरता बनाए रखें और किसी भी नए निर्णय को सोच-समझकर लें। आर्थिक मामलों में दिन सामान्य रहेगा।"
+                )
+                timing_str = "आज सूर्योदय से लेकर रात्रि तक यह गोचर प्रभाव प्रभावी रहेगा।"
+                prac_sug = "आज प्रातः भगवान शिव को जल अर्पित करें या ओम नमः शिवाय का 108 बार जाप करें, इससे दिन अत्यंत मंगलमय रहेगा।"
+                follow_ups = [
+                    "आज के दिन मुझे किस दिशा में कार्य करने से लाभ होगा?",
+                    "इस सप्ताह में मेरे लिए सबसे शुभ दिन कौन सा रहेगा?",
+                    "मेरे करियर के लिए कौन-सा उपाय सर्वोत्तम रहेगा?"
+                ]
+            else:
+                direct_ans = f"Greetings! For your Moon sign ({moon}) and Lagna ({lagna}), today shows favorable and steady energy."
+                short_exp = (
+                    f"Under the current {dasha} influence, transit Moon brings stability. "
+                    f"Focus on clear communication and thoughtful decision-making in professional matters today."
+                )
+                timing_str = "This transit influence is active throughout today."
+                prac_sug = "Begin your morning with peaceful meditation and prayer for an auspicious day."
+                follow_ups = [
+                    "Which day this week is most auspicious for me?",
+                    "What remedies will help my career growth?",
+                    "How is my financial outlook for the coming month?"
+                ]
+
+            return {
+                "direct_answer": direct_ans,
+                "short_explanation": short_exp,
+                "timing": timing_str,
+                "supporting_factors": ["Transit Moon alignment", "Dasha lord support"],
+                "challenging_factors": ["Avoid impulsive arguments"],
+                "practical_suggestion": prac_sug,
+                "confidence": 0.85,
+                "classical_basis": [],
+                "technical_astrological_reason": "",
+                "follow_up_questions": follow_ups,
+                "evidence_ids": [evidence.fact_hash[:8]],
+                "fact_hash": evidence.fact_hash,
+                "disclaimer": "Predictions are astrological guidance, not absolute certainty. No medical diagnosis or guaranteed financial returns."
+            }
 
         TOPIC_MAP_HI = {
             "FIRST_MARRIAGE": "प्रथम विवाह",
@@ -317,7 +446,7 @@ class AIProviderGateway:
             direct_ans = f"शुभकामनाएं! आपकी जन्म कुंडली में {topic_display} के संदर्भ में ग्रहों का संचरण {strength_disp} संकेत दे रहा है।"
             short_exp = (
                 f"वर्तमान में {dasha_chain} का प्रभाव सक्रिय है। "
-                f"ग्रह स्थिति बताती है कि {verdict} इस अवधि में सही दिशा में प्रयास करने से उत्तम परिणाम प्राप्त होंगे।"
+                f"ग्रह स्थिति बताती है कि इस अवधि में सही दिशा में निरंतर प्रयास करने से उत्तम परिणाम प्राप्त होंगे।"
             )
             timing_str = f"यह ज्योतिषीय प्रभाव {evidence.active_dasha_chain[1]['end'][:10] if len(evidence.active_dasha_chain) > 1 else 'वर्तमान काल'} तक विशेष प्रभावशाली रहेगा।"
             prac_sug = "अपने कर्तव्यों का निष्ठापूर्वक पालन करें और नित्य प्रातः भगवान शिव का ध्यान व इष्ट मंत्र का जाप करें, इससे कार्यों में आ रही बाधाएं दूर होंगी।"
@@ -330,7 +459,7 @@ class AIProviderGateway:
             direct_ans = f"Greetings! In your birth chart, the planetary alignment regarding {topic_display} shows {strength_disp} indications."
             short_exp = (
                 f"Currently, the period under {dasha_chain} is active. "
-                f"The alignment suggests that {verdict} Guided action during this phase will yield positive progress."
+                f"The alignment suggests that guided action during this phase will yield positive progress."
             )
             timing_str = f"This influence remains prominent until {evidence.active_dasha_chain[1]['end'][:10] if len(evidence.active_dasha_chain) > 1 else 'the current phase'}."
             prac_sug = "Stay dedicated to your responsibilities and practice daily morning meditation and prayer for peace and clarity."
@@ -355,4 +484,5 @@ class AIProviderGateway:
             "fact_hash": evidence.fact_hash,
             "disclaimer": "Predictions are astrological guidance, not absolute certainty. No medical diagnosis or guaranteed financial returns."
         }
+
 
