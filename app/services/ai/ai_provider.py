@@ -290,20 +290,21 @@ class AIProviderGateway:
             if language == "hi":
                 direct_ans = f"शुभकामनाएं! आपकी जन्म लग्न कुंडली ({lagna} लग्न, {moon} राशि) के ग्रह चक्र एवं दशा नियमों के अनुसार आपके अतीत जीवन की 5 मुख्य घटनाएं इस प्रकार दृष्टिगोचर होती हैं:"
 
-                events_list = [
-                    "1. प्रारंभिक शिक्षा व ज्ञान विकास काल: बचपन में बुद्ध व गुरु के प्रभाव से शिक्षा व बौद्धिक क्षमता का निर्माण हुआ।",
-                    "2. मुख्य करियर व दिशा निर्धारण काल: 18 से 22 वर्ष की आयु के दौरान प्रथम बड़े करियर परिवर्तन व लक्ष्य निर्धारण का चरण।",
-                    "3. आर्थिक व सामाजिक प्रतिष्ठा वृद्धि: पिछले महत्वपूर्ण दशा परिवर्तन के दौरान कार्यक्षेत्र में उन्नति व नवीन संपर्कों का लाभ।",
-                    "4. पारिवारिक व व्यक्तिगत संबंध मील का पत्थर: शुक्र एवं चंद्र के प्रभाव से व्यक्तिगत जीवन व पारिवारिक संबंधों में महत्वपूर्ण मोड़।",
-                    "5. मानसिक परिपक्वता व आत्म-मंथन काल: शनि व राहु के गोचर प्रभाव से जीवन में अनुशासन, धैर्य व नई दृष्टि का निर्माण।"
+                human_past_meanings = [
+                    "विद्या व ज्ञान विकास काल — इस अवधि में बौद्धिक क्षमता का निर्माण, नई विद्या व महत्वपूर्ण कौशल सीखने का मुख्य कालखंड रहा।",
+                    "करियर मोड़ व आजीविका आरंभ — इस अवधि में कार्यक्षेत्र में प्रथम बड़ा परिवर्तन, नए उत्तरदायित्व व जीवन की नई दिशा का निर्धारण हुआ।",
+                    "आर्थिक मजबूती व प्रतिष्ठा वृद्धि — इस कालखंड में वित्तीय स्थिति में विस्तार, नए संपर्कों का लाभ व सामाजिक मान-सम्मान में वृद्धि हुई।",
+                    "पारिवारिक जीवन व महत्वपूर्ण संबंध — इस समय व्यक्तिगत व पारिवारिक जीवन में सुखद बदलाव, मांगलिक कार्य व महत्वपूर्ण संबंधों का निर्माण हुआ।",
+                    "आत्म-मंथन व परिपक्वता काल — इस काल में जीवन में अनुशासन, धैर्य, गंभीर फैसलों व भविष्य के प्रति नई दृष्टि का विकास हुआ।"
                 ]
 
+                events_list = []
                 if windows:
-                    events_list = []
                     for idx, w in enumerate(windows[:5], 1):
-                        clean_summary = w.summary.replace("for EventType.GENERAL_MAJOR_EVENT", "मुख्य जीवन घटना").replace("Significant", "शुभ").replace("influence active in this period", "का प्रभाव सक्रिय रहा")
-                        events_list.append(f"{idx}. कालखंड {w.start_date[:7]} से {w.end_date[:7]}: {w.dasha_lord} ग्रह दशा प्रभाव से {clean_summary}।")
-
+                        meaning = human_past_meanings[idx - 1] if idx <= len(human_past_meanings) else "जीवन में महत्वपूर्ण परिवर्तन व अनुकूल फलदायी बदलाव का समय रहा।"
+                        events_list.append(f"{idx}. कालखंड {w.start_date[:7]} से {w.end_date[:7]}: {meaning}")
+                else:
+                    events_list = [f"{idx}. {m}" for idx, m in enumerate(human_past_meanings, 1)]
 
                 short_exp = "\n\n".join(events_list)
                 timing_str = "यह आपके अतीत (Past Lifecycle) के मुख्य ग्रहों की चाल पर आधारित ऐतिहासिक विश्लेषण है।"
@@ -315,17 +316,20 @@ class AIProviderGateway:
                 ]
             else:
                 direct_ans = f"Greetings! Based on your natal chart ({lagna} Ascendant, {moon} Moon) and classical Dasha timelines, here are the 5 major past life milestones indicated by the planets:"
-                events_list = [
-                    "1. Early Foundation & Education: Primary intellectual development shaped by Mercury and Jupiter alignments.",
-                    "2. Career & Direction Milestone: Primary orientation and key career decisions around age 18-22.",
-                    "3. Financial & Professional Growth: Notable rise in professional standings during the preceding key Dasha transition.",
-                    "4. Relationship & Family Milestone: Significant personal or family alignment influenced by Venus/Moon periods.",
-                    "5. Maturity & Realignment Phase: Discipline and valuable life lessons shaped by Saturn and Rahu transits."
+                human_past_en = [
+                    "Education & Skill Foundation Phase — Intellectual growth, academic milestones, and acquiring core skills.",
+                    "Career Orientation & Profession Shift — First major professional direction, career shift, and new responsibilities.",
+                    "Financial Growth & Social Standing — Expansion in financial standing, professional recognition, and valuable connections.",
+                    "Family & Personal Relationship Milestone — Important auspicious events in family and personal life relationships.",
+                    "Maturity & Strategic Realignment — Phase of discipline, patient learning, and building long-term vision."
                 ]
+                events_list = []
                 if windows:
-                    events_list = []
                     for idx, w in enumerate(windows[:5], 1):
-                        events_list.append(f"{idx}. Period {w.start_date[:7]} to {w.end_date[:7]}: Influenced by {w.dasha_lord} Dasha bringing {w.summary}.")
+                        meaning = human_past_en[idx - 1] if idx <= len(human_past_en) else "Significant transitional milestone in life."
+                        events_list.append(f"{idx}. Period {w.start_date[:7]} to {w.end_date[:7]}: {meaning}")
+                else:
+                    events_list = [f"{idx}. {m}" for idx, m in enumerate(human_past_en, 1)]
 
                 short_exp = "\n\n".join(events_list)
                 timing_str = "This analysis covers key past transit and Dasha cycles."
@@ -351,6 +355,7 @@ class AIProviderGateway:
                 "fact_hash": evidence.fact_hash,
                 "disclaimer": "Predictions are astrological guidance, not absolute certainty. No medical diagnosis or guaranteed financial returns."
             }
+
 
         elif is_today_query:
             lagna = evidence.lagna_rashi
