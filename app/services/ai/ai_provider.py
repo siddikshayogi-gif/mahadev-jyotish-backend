@@ -400,6 +400,7 @@ class AIProviderGateway:
                 "disclaimer": "Predictions are astrological guidance, not absolute certainty. No medical diagnosis or guaranteed financial returns."
             }
 
+        # Topic specific response
         TOPIC_MAP_HI = {
             "FIRST_MARRIAGE": "प्रथम विवाह",
             "MARRIAGE": "विवाह व दांपत्य जीवन",
@@ -438,35 +439,79 @@ class AIProviderGateway:
         }
 
         topic_display = TOPIC_MAP_HI.get(topic_raw, "जीवन क्षेत्र") if language == "hi" else TOPIC_MAP_EN.get(topic_raw, "Life Domain")
-        verdict = evidence.timing_verdict
-        strength_map = {"VERY_HIGH": "अत्यंत अनुकूल", "HIGH": "शुभ व अनुकूल", "MODERATE": "मध्यम", "LOW": "धैर्य व सतर्कता योग्य"}
+        strength_map = {"VERY_HIGH": "अत्यंत अनुकूल व प्रबल", "HIGH": "शुभ व अनुकूल", "MODERATE": "मध्यम योग", "LOW": "धैर्य व सही समय का इंतजार योग्य"}
         strength_disp = strength_map.get(evidence.evidence_strength, "अनुकूल") if language == "hi" else evidence.evidence_strength.replace("_", " ").title()
 
         dasha_chain = " -> ".join([d["lord"] for d in evidence.active_dasha_chain[:3]]) if evidence.active_dasha_chain else "सक्रिय ग्रह दशा"
 
+        # Determine exact timing window from candidate_windows or active_dasha_chain
+        start_date_window = "वर्तमान"
+        end_date_window = "2027"
+        if evidence.candidate_windows:
+            best_win = evidence.candidate_windows[0]
+            start_date_window = best_win.start_date[:7]
+            end_date_window = best_win.end_date[:7]
+        elif len(evidence.active_dasha_chain) > 1:
+            start_date_window = evidence.active_dasha_chain[1]["start"][:7]
+            end_date_window = evidence.active_dasha_chain[1]["end"][:7]
+
         if language == "hi":
-            direct_ans = f"शुभकामनाएं! आपकी जन्म कुंडली में {topic_display} के संदर्भ में ग्रहों का संचरण {strength_disp} संकेत दे रहा है।"
-            short_exp = (
-                f"वर्तमान में {dasha_chain} का प्रभाव सक्रिय है। "
-                f"ग्रह स्थिति बताती है कि इस अवधि में सही दिशा में निरंतर प्रयास करने से उत्तम परिणाम प्राप्त होंगे।"
-            )
-            timing_str = f"यह ज्योतिषीय प्रभाव {evidence.active_dasha_chain[1]['end'][:10] if len(evidence.active_dasha_chain) > 1 else 'वर्तमान काल'} तक विशेष प्रभावशाली रहेगा।"
-            prac_sug = "अपने कर्तव्यों का निष्ठापूर्वक पालन करें और नित्य प्रातः भगवान शिव का ध्यान व इष्ट मंत्र का जाप करें, इससे कार्यों में आ रही बाधाएं दूर होंगी।"
-            follow_ups = [
-                f"इस {topic_display} अवधि में कौन-से उपाय फलदायी रहेंगे?",
-                "आने वाले महीनों में ग्रहीय स्थितियां किस प्रकार बदलेंगी?",
-                "मेरे जीवन के मुख्य लक्ष्यों के लिए कौन-सा समय सर्वश्रेष्ठ रहेगा?"
-            ]
+            if topic_raw in ["FIRST_MARRIAGE", "MARRIAGE", "LOVE_RELATIONSHIP"]:
+                direct_ans = f"शुभकामनाएं! आपकी जन्म लग्न कुंडली में {topic_display} का योग {start_date_window} से {end_date_window} के मध्य होने के {strength_disp} संकेत दे रहा है।"
+                short_exp = (
+                    f"शास्त्रगत नियमों के अनुसार इसके 3 मुख्य कारण हैं:\n"
+                    f"1. सप्तमेश व विवाह कारक ग्रह (शुक्र/गुरु) का शुभ प्रभाव: जन्म कुंडली एवं नवमांश (D9) में विवाह कारक ग्रहों की स्थिति अत्यंत बलवान है।\n"
+                    f"2. विंशोत्तरी दशा चक्र: वर्तमान में {dasha_chain} की दशा सक्रिय है, जो कुटुंब व विवाह भाव को ऊर्जा प्रदान कर रही है।\n"
+                    f"3. देवगुरु बृहस्पति का गोचर: गोचर में बृहस्पति का शुभ दृष्टि संबंध विवाह योग को फलीभूत बना रहा है।"
+                )
+                timing_str = f"मुख्य विवाह कालखंड: {start_date_window} से {end_date_window} तक प्रबल फलदायी रहेगा।"
+                prac_sug = "नित्य प्रातः मां दुर्गा या देवी लक्ष्मी की उपासना करें, और शुक्रवार के दिन सफेद वस्त्र व मिष्ठान का दान करें।"
+                follow_ups = [
+                    "जीवनसाथी का स्वभाव, रंग-रूप और पेशा कैसा रहेगा?",
+                    "विवाह में आ रही रुकावटों को दूर करने के लिए कौन-सा अचूक उपाय करें?",
+                    "क्या लव मैरिज होगी या अरेंज्ड मैरिज के योग हैं?"
+                ]
+            elif topic_raw in ["CAREER", "GOVERNMENT_JOB", "BUSINESS", "BUSINESS_GROWTH"]:
+                direct_ans = f"शुभकामनाएं! आपकी जन्म कुंडली में {topic_display} में बड़ी सफलता व उन्नति का योग {start_date_window} से {end_date_window} के मध्य {strength_disp} दिखाई दे रहा है।"
+                short_exp = (
+                    f"शास्त्रों के अनुसार इसके मुख्य कारण इस प्रकार हैं:\n"
+                    f"1. दशमेश व दशमांश (D10) की स्थिति: करियर भाव का स्वामी ग्रह एवं सूर्य/शनि का प्रभाव कार्यक्षेत्र में अधिकार व प्रतिष्ठा दे रहा है।\n"
+                    f"2. सक्रिय दशा स्वामी: {dasha_chain} की दशा कालखंड में आपके निर्णय व मेहनत को सही दिशा में फल प्रदान कर रही है।\n"
+                    f"3. गोचर का समर्थन: गोचर में ग्रहों का केंद्र-त्रिकोण संबंध कार्यक्षेत्र में पदोन्नति/लाभ के नए अवसर बनाएगा।"
+                )
+                timing_str = f"मुख्य सफलता कालखंड: {start_date_window} से {end_date_window} तक अति शुभ रहेगा।"
+                prac_sug = "प्रातःकाल सूर्य देव को तांबे के पात्र से जल अर्पित करें और आदित्य हृदय स्तोत्र का पाठ करें।"
+                follow_ups = [
+                    "मुझे किस व्यापार या नौकरी के क्षेत्र में सबसे अधिक धन लाभ होगा?",
+                    "क्या मुझे विदेश या अन्य शहर में कार्य करने से सफलता मिलेगी?",
+                    "करियर में आ रही अड़चनों के लिए कौन-सा रत्न धारण करना चाहिए?"
+                ]
+            else:
+                direct_ans = f"शुभकामनाएं! आपकी जन्म कुंडली में {topic_display} के संदर्भ में ग्रहों का संचरण {strength_disp} संकेत दे रहा है।"
+                short_exp = (
+                    f"शास्त्रगत नियमों के अनुसार मुख्य कारण:\n"
+                    f"1. वर्तमान दशा प्रभाव: {dasha_chain} की विंशोत्तरी दशा आपके जीवन में इस क्षेत्र को बल प्रदान कर रही है।\n"
+                    f"2. लग्न व भाव बल: संबंधित भाव के स्वामी ग्रह का गोचर व दृष्टि प्रभाव शुभ फलों का निर्माण कर रहा है।"
+                )
+                timing_str = f"मुख्य फलदायी कालखंड: {start_date_window} से {end_date_window} तक विशेष प्रभावशाली रहेगा।"
+                prac_sug = "अपने कर्तव्यों का निष्ठापूर्वक पालन करें और नित्य प्रातः भगवान शिव का ध्यान व इष्ट मंत्र का जाप करें, इससे कार्यों में आ रही बाधाएं दूर होंगी।"
+                follow_ups = [
+                    f"इस {topic_display} अवधि में कौन-से उपाय फलदायी रहेंगे?",
+                    "आने वाले महीनों में ग्रहीय स्थितियां किस प्रकार बदलेंगी?",
+                    "मेरे जीवन के मुख्य लक्ष्यों के लिए कौन-सा समय सर्वश्रेष्ठ रहेगा?"
+                ]
         else:
-            direct_ans = f"Greetings! In your birth chart, the planetary alignment regarding {topic_display} shows {strength_disp} indications."
+            direct_ans = f"Greetings! In your birth chart, the timing for {topic_display} is strongly indicated between {start_date_window} and {end_date_window} as {strength_disp}."
             short_exp = (
-                f"Currently, the period under {dasha_chain} is active. "
-                f"The alignment suggests that guided action during this phase will yield positive progress."
+                f"According to classical principles, here are the key reasons:\n"
+                f"1. House Lord & Significator Strength: The rulers of key houses and significators show strong support in D1 & divisional charts.\n"
+                f"2. Active Dasha Alignment: The current {dasha_chain} dasha period specifically activates this life domain.\n"
+                f"3. Transit Conjunctions: Auspicious planetary transits are magnifying the probability of this event."
             )
-            timing_str = f"This influence remains prominent until {evidence.active_dasha_chain[1]['end'][:10] if len(evidence.active_dasha_chain) > 1 else 'the current phase'}."
-            prac_sug = "Stay dedicated to your responsibilities and practice daily morning meditation and prayer for peace and clarity."
+            timing_str = f"Primary Favorable Window: {start_date_window} to {end_date_window}."
+            prac_sug = "Stay dedicated to your path and offer daily morning prayers for peace and accelerated success."
             follow_ups = [
-                f"What spiritual remedies are recommended for this {topic_display} phase?",
+                f"What specific remedies are recommended for this {topic_display} phase?",
                 "How will the transits shift in the coming months?",
                 "Which period is most favorable for my key goals?"
             ]
@@ -486,5 +531,6 @@ class AIProviderGateway:
             "fact_hash": evidence.fact_hash,
             "disclaimer": "Predictions are astrological guidance, not absolute certainty. No medical diagnosis or guaranteed financial returns."
         }
+
 
 

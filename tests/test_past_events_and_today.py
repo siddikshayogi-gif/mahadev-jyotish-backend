@@ -41,6 +41,23 @@ async def main():
     )
     res2 = await service.process_prediction(req2)
     print("ANSWER 2:\n", res2.answer)
+    print("\n" + "="*80 + "\n")
+
+    print("--- TEST 3: SPECIFIC MARRIAGE QUERY ---")
+    req3 = AskPredictionRequest(
+        profile_id="prof_jaipur_1998",
+        question="Meri shadi kab hogi?",
+        language="hi",
+        mode="DEEP",
+        date_of_birth="1998-02-05",
+        time_of_birth="11:30:00",
+        latitude=26.9124,
+        longitude=75.7873,
+        timezone_id="Asia/Kolkata"
+    )
+    res3 = await service.process_prediction(req3)
+    print("ANSWER 3:\n", res3.answer)
+
 
 if __name__ == "__main__":
     asyncio.run(main())
