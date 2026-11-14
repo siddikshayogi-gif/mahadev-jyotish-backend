@@ -28,7 +28,10 @@ TOPIC_KEYWORDS = {
     "TRAVEL": ["travel", "foreign", "visa", "abroad", "trip", "yatra", "videsh", "relocation", "immigration", "passport"],
     "FAMILY": ["family", "parents", "mother", "father", "brother", "sister", "parivar", "mata", "pita"],
     "SPIRITUALITY": ["spiritual", "god", "bhakti", "meditation", "dhyan", "moksha", "guru", "mantra", "puja"],
+    "TODAYS_DAILY_FORECAST": ["aaj ka din", "aaj kaisa", "aaj ka rashifal", "today forecast", "today day", "how is my day", "aaj ka samay", "आज का दिन", "आज कैसा", "aaj mera din"],
+    "PAST_5_MAJOR_EVENTS": ["past 5 events", "past ghatnaye", "past ghatna", "beeti ghatnae", "pehle ki ghatna", "past history", "5 past events", "5 ghatna", "past 5", "past events"],
     "GENERAL_MAJOR_EVENTS": ["major events", "life events", "life-event", "big events", "mukhya ghatnayein", "ghatna", "important", "badi ghatna", "strengths", "कुंडली की", "विशेषताएं"],
+
     "DASHA": ["dasha", "period", "vimshottari", "timeline", "mahadasa"],
     "GOCHAR": ["gochar", "transit", "planet shift", "planet change"],
     "PRASHNA": ["prashna", "horary", "question now"],

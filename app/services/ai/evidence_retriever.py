@@ -67,7 +67,10 @@ PLANNER_CONFIG = {
     "PROPERTY": {"houses": [4, 2, 11, 1], "vargas": ["D1", "D4"], "kp": True, "gochar": True, "yogas": True, "method": "HYBRID"},
     "FAMILY": {"houses": [2, 4, 11, 1], "vargas": ["D1", "D12"], "kp": False, "gochar": True, "yogas": True, "method": "VEDIC"},
     "SPIRITUALITY": {"houses": [9, 12, 5, 8, 1], "vargas": ["D1", "D20"], "kp": False, "gochar": True, "yogas": True, "method": "VEDIC"},
+    "TODAYS_DAILY_FORECAST": {"houses": [1, 2, 5, 9, 10, 11], "vargas": ["D1"], "kp": True, "gochar": True, "yogas": True, "method": "HYBRID"},
+    "PAST_5_MAJOR_EVENTS": {"houses": [1, 2, 4, 5, 7, 9, 10, 11], "vargas": ["D1", "D9", "D10"], "kp": True, "gochar": True, "yogas": True, "method": "HYBRID"},
     "GENERAL_MAJOR_EVENTS": {"houses": [1, 10, 7, 4, 5, 9, 2, 6, 8, 11, 12], "vargas": ["D1"], "kp": True, "gochar": True, "yogas": True, "method": "HYBRID"},
+
     "DASHA": {"houses": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], "vargas": ["D1"], "kp": True, "gochar": True, "yogas": True, "method": "VEDIC"},
     "GOCHAR": {"houses": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], "vargas": ["D1"], "kp": True, "gochar": True, "yogas": True, "method": "VEDIC"},
     "KP": {"houses": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], "vargas": [], "kp": True, "gochar": False, "yogas": False, "method": "KP"},
